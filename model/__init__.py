@@ -1,1 +1,2 @@
-from fnn import FNN
+from .fnn import FNN
+from .autoencoder import FNNJetAutoencoder
