@@ -1,8 +1,14 @@
+import sys
+from pathlib import Path
+
+project_path = Path(__file__).parent.parent
+sys.path.insert(0, str(project_path))
+
 from typing import List, Optional
 import torch
 from torch import nn
 
-from utils.const import DEFAULT_DTYPE, DEFAULT_DEVICE
+from utils import DEFAULT_DTYPE, DEFAULT_DEVICE
 
 
 class FNN(nn.Module):
@@ -12,7 +18,7 @@ class FNN(nn.Module):
         output_size: int,
         hidden_sizes: Optional[List[int]] = None,
         dtype: torch.dtype = DEFAULT_DTYPE,
-        device: torch.device = DEFAULT_DEVICE
+        device: torch.device = DEFAULT_DEVICE,
     ) -> None:
         """Standard Feedforward Neural Network (FNN).
 
@@ -27,27 +33,23 @@ class FNN(nn.Module):
         :type dtype: torch.dtype, optional
         :param device: device of the model, defaults to DEFAULT_DEVICE
         :type device: torch.device, optional
-        """        
+        """
         super(FNN, self).__init__()
-        
+
         if (hidden_sizes is None) or (len(hidden_sizes) == 0):
             # no hidden layers
-            self.fnn = nn.Sequential(
-                nn.Linear(input_size, output_size),
-                nn.ReLU()
-            )
+            self.fnn = nn.Sequential(nn.Linear(input_size, output_size), nn.ReLU())
         else:
             # hidden layers
-            input = nn.Sequential(
-                nn.Linear(input_size, hidden_sizes[0]),
-                nn.ReLU()
+            input_layer = nn.Sequential(
+                nn.Linear(input_size, hidden_sizes[0]), nn.ReLU()
             )
-            hidden = nn.ModuleList()
+            hidden_layers = nn.ModuleList()
             for i in range(len(hidden_sizes) - 1):
-                hidden.append(nn.Linear(hidden_sizes[i], hidden_sizes[i + 1]))
-                hidden.append(nn.ReLU())
-            output = nn.Linear(hidden_sizes[-1], output_size)
-            self.fnn = nn.Sequential(*input, *hidden, output)
+                hidden_layers.append(nn.Linear(hidden_sizes[i], hidden_sizes[i + 1]))
+                hidden_layers.append(nn.ReLU())
+            output_layer = nn.Linear(hidden_sizes[-1], output_size)
+            self.fnn = nn.Sequential(*input_layer, *hidden_layers, output_layer)
 
         self.device = device
         self.dtype = dtype
