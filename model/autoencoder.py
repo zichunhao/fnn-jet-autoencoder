@@ -109,6 +109,6 @@ class Reshape(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x.reshape(self.shape)
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         # ignore batch dimension
-        return f"Reshape{self.shape[1:]}"
+        return f"Reshape({self.shape[1:]})"
