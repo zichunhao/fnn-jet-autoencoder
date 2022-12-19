@@ -54,9 +54,7 @@ class FNNJetAutoencoder(nn.Module):
 
     def forward(self, x: torch.Tensor, latent: bool = False) -> torch.Tensor:
         x = x.to(dtype=self.dtype, device=self.device)
-        if len(x.shape) == 2:
-            x = x.unsqueeze(0)
-        elif len(x.shape) == 3:
+        if len(x.shape) in (2, 3):
             pass
         else:
             raise ValueError(
@@ -65,18 +63,14 @@ class FNNJetAutoencoder(nn.Module):
                 "or (num_particles, feature_dim). "
                 f"Got: {x.shape=}"
             )
-        z = self.encoder(x)
-        x = self.decoder(z)
+        z = self.encoder(x)  # (batch_size, latent_size)
+        x = self.decoder(z)  # (batch_size, num_particles, feature_dim)
         if latent:
             # (recons, latent)
             return x, z
         else:
             # recons
             return x
-
-    @property
-    def compression_rate(self) -> float:
-        return self.latent_size / self.total_size
 
     def __str__(self) -> str:
         s = f"FNNJetAutoencoder(\n"
@@ -92,6 +86,10 @@ class FNNJetAutoencoder(nn.Module):
 
         s += f")"
         return s
+
+    @property
+    def compression_rate(self) -> float:
+        return self.latent_size / self.total_size
 
     @property
     def num_learnable_params(self) -> int:
